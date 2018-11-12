@@ -1,0 +1,14 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+%:
+	dh $@
+
+override_dh_install:
+	install -o root -g root -m0755 alternc-slavedns debian/alternc-slavedns/usr/sbin/
+	install -o root -g root -m0640 defaults.conf debian/alternc-slavedns/etc/alternc/slavedns/
+	chown root.root debian/alternc-slavedns/var/cache/slavedns
+	chown root.root debian/alternc-slavedns/etc/bind/slavedns

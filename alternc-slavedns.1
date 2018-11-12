@@ -1,0 +1,56 @@
+.\"                                      Hey, EMACS: -*- nroff -*-
+.\" First parameter, NAME, should be all caps
+.\" Second parameter, SECTION, should be 1-8, maybe w/ subsection
+.\" other parameters are allowed: see man(7), man(1)
+.TH ALTERNC-SLAVEDNS 1 "octobre  4, 2007"
+.\" Please adjust this date whenever revising the manpage.
+.\"
+.\" Some roff macros, for reference:
+.\" .nh        disable hyphenation
+.\" .hy        enable hyphenation
+.\" .ad l      left justify
+.\" .ad b      justify to both left and right margins
+.\" .nf        disable filling
+.\" .fi        enable filling
+.\" .br        insert line break
+.\" .sp <n>    insert n+1 empty lines
+.\" for manpage-specific macros, see man(7)
+.SH NAME
+alternc-slavedns \- synchronise local secondary nameserver list with
+remote
+.SH SYNOPSIS
+.B alternc-slavedns
+.RI [ -f ] [ -d ] [ config ... ]
+.SH DESCRIPTION
+The 
+.B alternc-slavedns
+program can be used to synchronise a secondary nameserver with a master
+nameserver. It fetches the domain list through HTTP(S) and regenerates
+the appropriate bind configuration so that nameserver replication works
+properly.
+.PP
+.SH OPTIONS
+The commandline parser is crude and minimal. Any unknown option is
+treated as a configuration file. If a configuration file is specified,
+only this configuration is synchronised, otherwise all configuration are
+synchronised.
+.TP
+.B \-f
+Force regeneration of the configuration even if the domain list hasn't
+changed.
+.TP
+.B \-d
+Show output of wget and internal debugging output, useful to figure out
+what is wrong.
+.SH SEE ALSO
+.BR wget (1).
+.BR named (1).
+.PP
+The README file has more configuration instructions, that will
+eventually be merged here.
+.SH AUTHOR
+alternc-slavedns was written by Benjamin Soontag, with extensive
+refactoring and enhancements by Antoine Beaupr[\'e]
+.PP
+This manual page was written by Antoine Beaupr[\'e] <anarcat@koumbit.org>
+for the Debian project (but may be used by others).

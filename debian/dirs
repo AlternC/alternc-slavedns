@@ -1,0 +1,4 @@
+etc/bind/slavedns
+etc/alternc/slavedns
+var/cache/slavedns
+usr/sbin

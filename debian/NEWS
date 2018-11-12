@@ -1,0 +1,7 @@
+alternc-slavedns (1.0) stable; urgency=low
+
+  * this is now installed as alternc-slavedns, and the configuration now sits
+    in /etc/alternc/slavedns, please correct your installation as required, as
+    this upgrade will not do it for you and will break your install otherwise.
+
+ -- Antoine Beaupré <anarcat@koumbit.org>  Thu,  4 Oct 2007 16:05:10 -0400

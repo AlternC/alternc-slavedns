@@ -1,0 +1,31 @@
+Source: alternc-slavedns
+Section: admin
+Priority: optional
+Maintainer: Antoine Beaupré <anarcat@debian.org>
+Build-Depends: debhelper (>= 9), po-debconf
+Standards-Version: 3.9.3
+
+Package: alternc-slavedns
+Architecture: all
+Depends: debconf (>= 0.5.00), bind | bind9, wget | wget-ssl, cron, ${misc:Depends}
+Suggests: ca-certificates
+Description: Synchronize slave dns servers domain lists from masters
+ This package automatically configures your server to grab list of domains
+ from a remote server. It was originally designed for the AlternC
+ control panel but can work with any server that is willing to provide
+ its domain list via HTTP(S).
+ .
+ Note that you still need to configure explicitly every server to be
+ synchronised with.
+ .
+ For more information, see http://www.alternc.org/
+Description-fr: Synchronisation de listes de domaines pour DNS secondaire
+ Ce paquet configure votre serveur dns pour synchroniser la liste des 
+ domaines d'un serveur dns secondaire depuis un autre serveur DNS. Il a
+ été originalement conçu pour AlternC mais fonctionnera avec tout
+ serveur de nom qui fourni une liste de domaines via HTTP(S).
+ .
+ Notez que chaque serveur à synchroniser doit être explicitement
+ configuré.
+ .
+ Plus d'information sur http://www.alternc.org/

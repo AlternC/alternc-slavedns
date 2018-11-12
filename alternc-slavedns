@@ -1,0 +1,210 @@
+#!/bin/bash
+# Synchronize a dns server with alternc's remote server : 
+# the configuration files contains definitions for remote masters.
+
+CONFDIR=/etc/alternc/slavedns
+CACHEDIR=/var/cache/slavedns
+BINDDIR=/etc/bind/slavedns
+BINDINCLUDE=/etc/bind/slavedns.conf
+WGETRC=${HOME}/.wgetrc
+WGET=wget
+WGETFLAGS="-q"
+NAMED="/etc/init.d/bind restart" 
+DEFAULTS="defaults.conf"
+DEFAULTSFILE="${CONFDIR}/${DEFAULTS}"
+DEBUG=false
+
+usage() {
+    cat <<EOF
+$0 [ -f ] [ -d ] [ -h ] [ config ]
+
+Performs a sync of the list of domains to replicate from master.
+
+Multiple master servers can be used, one per file in $CONFDIR
+If a config file is specified on the command line, only that server
+will be synced. The $BINDINCLUDE file will also be generated to include
+the right configuration.
+
+-f: refresh domain list even if it hasn't changed
+-d: show everything we're doing
+-h: this help
+EOF
+}
+
+for i; do
+    case "$i" in
+        -f)
+            FORCE=yes
+            ;;
+        -d)
+            DEBUG=true
+            ;;
+        -h)
+            usage
+            exit 0
+            ;;
+        *)
+            CONFIGS="${CONFIGS} ${i}"
+            ;;
+    esac
+done
+
+cd $CONFDIR
+
+if [ -z "$CONFIGS" ]; then
+    CONFIGS=`ls $CONFDIR | grep -v ~`
+fi
+
+TIMEOUT=5
+
+CreateBindConf() {
+    CFILE="$1"
+    # create a new config for this host, in a tempfile
+    while read domain; do
+        # check if the data is valid, this will also display the domain in debug mode
+        if echo $domain | grep -i '^\([a-z0-9]\([-a-z0-9]*[a-z0-9]\)\?\.\)*[a-z0-9]\([-a-z0-9]*[a-z0-9]\)$'; then
+            echo "validated domain $domain" | MaybeCat
+        else
+            echo invalid domain listing: $domain, skipping file $CFILE >&2
+            rm -f ${BINDDIR}/${CFILE}.$$
+            return
+        fi
+        master=`grep -l "^$domain\$" ${CACHEDIR}/* | head -1`
+        if [ "$master" != "${CACHEDIR}/${CFILE}" ]; then
+            echo "domain $domain already present in another master ($master), skipping" >&2
+            continue
+        fi
+        cat >> ${BINDDIR}/${CFILE}.$$ <<EOF
+zone "$domain" {
+    type slave;
+    allow-query { any; };
+    file "$domain";
+    masters { ${MASTERIP}; };
+};
+EOF
+    done < ${CACHEDIR}/${CFILE}
+    mv ${BINDDIR}/${CFILE}.$$ ${BINDDIR}/${CFILE}
+    INCLUDE_STR="include \"${BINDDIR}/${CFILE}\";"
+
+    grep -q "${INCLUDE_STR}" ${BINDINCLUDE} || echo ${INCLUDE_STR} >>${BINDINCLUDE}
+}
+
+SetWgetPass() {
+    USER="$1"
+    PASS="$2"
+    if [ -e ${WGETRC} ]; then
+        mv ${WGETRC} ${WGETRC}.$$
+    fi
+    touch ${WGETRC}
+    chmod og-r ${WGETRC}
+    cat >> ${WGETRC} <<EOF
+http_user = ${USER}
+http_passwd = ${PASS}
+EOF
+}
+
+ResetWgetConf() {
+    mv -f ${WGETRC}.$$ ${WGETRC} 2>/dev/null || rm -f ${WGETRC}
+}
+
+MaybeCat() {
+    if $DEBUG; then
+        cat
+    else
+        cat > /dev/null
+    fi
+    return 0
+}
+
+# Main procedure : parse each config file and download the raw slave list.
+# if something changed in a list, call CreateBindConf $i 
+
+RELOAD=""
+
+for conf in ${CONFIGS}; do
+    [ "${DEFAULTS}" = "${conf}" -o "slavedns.conf" = "${conf}" ] && continue
+    URL=""
+    # source defaults
+    . ${DEFAULTSFILE}
+    # source this site's config
+    . $CONFDIR/${conf}
+    if [ -z "$URL" ]; then
+        if [ -z "$PROTOCOL" ]; then
+            if [ "$SSL" ]; then
+                PROTOCOL=https
+            else
+                PROTOCOL=http
+            fi
+        fi
+        URL=${PROTOCOL}://${HOST}/admin/domlist.php
+    fi
+
+    if [ ! -z "$INTEGRITY" ] ; then
+      if [ $INTEGRITY -eq 1 ] ; then
+        URL="$URL?integrity=1"
+      fi
+    fi
+
+    if [ -z "$URL" -a -z "$HOST" -o -z "$MASTERIP" ]; then
+        echo "error in the config file '${conf}'" >&2
+    else
+        touch ${CACHEDIR}/${conf}
+        rm -f ${CACHEDIR}/${conf}.temp
+        [ "${LOGIN}" ] && SetWgetPass ${LOGIN} ${PASSWORD}
+        ${WGET} ${URL} ${WGETFLAGS} -O ${CACHEDIR}/${conf}.temp -t 1 -T ${TIMEOUT} 2>&1 | MaybeCat
+        [ "${LOGIN}" ] && ResetWgetConf
+        if [ -s "${CACHEDIR}/${conf}.temp" ]; then
+            # If there are integrity check setup, 
+            # Get of the checksum of the file and compare it
+            if [ ! -z "$INTEGRITY" ] ; then
+              if [ $INTEGRITY -eq 1 ] ; then
+                # Get the checksum
+                checksum="$( tail -1 "${CACHEDIR}/${conf}.temp" )"
+                echo "$checksum  ${CACHEDIR}/${conf}.temp" > "${CACHEDIR}/${conf}.temp.md5sum"
+                # Get it of the file
+                tmpff="$( cat "${CACHEDIR}/${conf}.temp" |grep -v "$checksum")"
+                echo -e "$tmpff" > "${CACHEDIR}/${conf}.temp"
+                # Calculate checksum
+                md5sum --warn --check --status "${CACHEDIR}/${conf}.temp.md5sum"
+                checkmd=$?
+                if [ "x$checkmd" != "x0" ] ; then
+                  echo "Error: bad checksum for $conf"
+                  echo "+++ BEGIN +++"
+                  echo -e "$tmpff"
+                  echo "+++  END  +++"
+                  echo -n "Local checksum: "
+                  cat "${CACHEDIR}/${conf}.temp.md5sum" 
+                  # Clean the file and do the next conf file
+                  rm "${CACHEDIR}/${conf}.temp.md5sum" "${CACHEDIR}/${conf}.temp"
+                  continue
+                fi
+              fi
+            fi
+
+            test -e "${CACHEDIR}/${conf}.temp.md5sum" && rm "${CACHEDIR}/${conf}.temp.md5sum"
+
+
+            # If the slave file has changed, synchronize it.
+            if ! [ "${FORCE}" ] && cmp ${CACHEDIR}/${conf}.temp ${CACHEDIR}/${conf} > /dev/null; then
+                echo "no change found for '${conf}'"
+            else
+                echo "change detected for '${conf}', applying"
+                mv -f ${CACHEDIR}/${conf}.temp ${CACHEDIR}/${conf}
+                # Now parse the slave file and send it to /etc/bind/slavedns
+                CreateBindConf ${conf}
+                if /usr/sbin/named-checkconf ${BINDDIR}/${conf}; then
+                    RELOAD="yes"
+                else
+                    echo "error: file ${conf} is not correct" >&2
+                fi
+            fi
+        else
+            echo "downloaded file for '${conf}' has zero size" >&2
+            rm -f ${CACHEDIR}/${conf}.temp
+        fi
+    fi
+done # Main loop on config files
+
+if [ "$RELOAD" ]; then
+    ${NAMED} >/dev/null
+fi

@@ -1,0 +1,23 @@
+Outil de synchronisation de domaines
+====================================
+
+Cet outil a été conçu pour fonctionner avec le panneau de contrôle AlternC
+(http://alternc.org/) sur Debian, quoiqu'avec la bonne dose de configuration,
+il peut fonctionner avec n'importe quelle platforme.
+
+Principe de fonctionnement
+==========================
+
+Le serveur maître (ou un autre serveur communiquand avec le maître) construit
+une liste de domaines qui doivent être répliqués sur une page web quelconque.
+Ceci est pour l'instant fait avec un script PHP dans la configuration par
+défaut d'alternc, mais ça peut parfaitement être un simple fichier mis à jour
+manuellement.
+
+Le script slavedns télécharge cette liste de domaines, la compare avec sa cache
+locale et configure BIND pour devenir esclave des nouveaux domaines détectés.
+
+La liste est téléchargée avec "wget" par défaut. Le script support le SSL et
+l'authenfication HTTP. Il est conçu pour fonctionner dans un cron job.
+
+Voir le README pour le reste de la documentation, en anglais.

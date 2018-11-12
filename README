@@ -1,0 +1,78 @@
+Simple domain list synchronisation tool
+=======================================
+
+This tool is designed to work with the AlternC control panel (http://alternc.org)
+on Debian, although with the right amount of configuration, it can be made to
+work with any platform.
+
+Design principle
+================
+
+The master server (or some other server talking to the master) makes the list
+of domains to be mirrored on a webpage somewhere. This package will fetch this
+list, compare it to its local cache, and configure bind to be a slave for the
+new domains detected.
+
+The list is fetched with "wget" by default. The script supports SSL and HTTP
+Authentification. It is designed to run through a cron job.
+
+Installation
+============
+
+Under debian, just `apt-get install alternc-slavedns`.
+
+Under other platforms, or for porters (this example assumes a FreeBSD install):
+
+ 1. Install the script in your `$PATH` (e.g. `/usr/local/sbin/alternc-slavedns`)
+ 2. Install the configuration file in `/etc/alternc/slavedns/default.conf`
+ 3. Setup a cronjob like this:
+
+        10 * * * * root /usr/local/sbin/alternc-slavedns > /dev/null
+
+Configuration
+=============
+
+Configuration is driver by the `slavedns.conf` (for default values) and scripts
+created in the `/etc/slavedns` directory (for each sync'd domain).
+
+Creating a new site
+-------------------
+
+In short:
+
+    cd /etc/alternc/slavedns
+    cp -p defaults.conf site.conf
+    vi site.conf
+    alternc-slavedns # optional, should run in the next cron
+
+The settings in `defaults.conf` are self explanatory.
+
+Configuring file locations and programs
+---------------------------------------
+
+The `defaults.conf` file can override quite a few locations and programs for
+different environments. For example, under FreeBSD, you will probably want:
+
+    CACHEDIR=/var/spool/slavedns
+    BINDDIR=/etc/namedb/slavedns
+    BINDINCLUDE=/etc/namedb/slavedns.conf
+
+and many sites (including FreeBSD), will require:
+
+    NAMED="ndc restart"
+
+Some servers might also require:
+
+    WGETFLAGS="--no-check-certificate"
+
+if they don't have a "real" SSL certificate.
+
+Surviving disasters
+-------------------
+
+It is sometimes possible that this setup degenerates to the point it can't reach
+the master server, for example if the server is reached through DNS.
+
+For this reason, it might be advisable to hardcode those domain names in `/etc/hosts`
+so that if this nameserver looses its zonefiles, it can at least fetch them again
+from the upstream.

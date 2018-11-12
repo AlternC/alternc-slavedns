@@ -1,0 +1,33 @@
+#!/bin/sh
+
+set -e
+
+# Benjamin Sonntag <benjamin@alternc.org>
+
+case "$1" in
+remove)
+    ;;
+
+upgrade)
+    ;;
+
+purge)
+    # Remove the config file from named.conf
+    sed -i '/include "\/etc\/bind\/slavedns.conf";/d' /etc/bind/named.conf
+    # and also from alternc's config files if it's installed
+    if [ -f /etc/alternc/templates/bind/named.conf ]; then
+        sed -i '/include "\/etc\/bind\/slavedns.conf";/d' /etc/alternc/templates/bind/named.conf
+    fi
+    rm -f /etc/bind/slavedns.conf
+    ;;
+
+failed-upgrade|abort-install|abort-upgrade|disappear)
+    ;;
+
+*)
+    echo "postrm called with unknown argument '$1'" >&2
+    exit 1
+    ;;
+esac
+
+#DEBHELPER#

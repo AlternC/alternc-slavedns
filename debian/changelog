@@ -1,0 +1,133 @@
+alternc-slavedns (3.2.1) stable; urgency=low
+
+  * reload bind properly on install
+  * remove pre 0.9.3 compatibility shims
+  * properly cleanup on purge
+
+ -- Antoine Beaupré <anarcat@debian.org>  Wed, 07 May 2014 11:01:34 -0400
+
+alternc-slavedns (3.2.0) stable; urgency=low
+
+  * prepare upload for "wheezy" repository
+  * send warnings to stderr properly for integrity checks
+  * fixup documentation in README
+  * switch to semantic versionning to allow for multiple releases of this
+    module for the 3.2 release family
+
+ -- Antoine Beaupré <anarcat@debian.org>  Wed, 07 May 2014 10:41:30 -0400
+
+alternc-slavedns (3.1) stable; urgency=low
+
+  * hotfix: fix regex for checking duplicate domains
+
+ -- Antoine Beaupré <anarcat@debian.org>  Mon, 09 Sep 2013 18:26:50 -0400
+
+alternc-slavedns (3.0) stable; urgency=low
+
+  [fufroma]
+  * Option for integrity check of the downloaded list (Alternc > 3.1)
+  * use bash instead of dash
+
+  [anarcat]
+  * don't configure duplicate domains that will crash bind
+
+ -- Antoine Beaupré <anarcat@debian.org>  Mon,  9 Sep 2013 16:39:19 -0400
+
+alternc-slavedns (1.3) unstable; urgency=low
+
+  * fix syntax error, spotted by LeLutin
+
+ -- Antoine Beaupré <anarcat@debian.org>  Thu, 14 Jun 2012 16:17:03 -0300
+
+alternc-slavedns (1.2) unstable; urgency=low
+
+  * whitespace cleanup of the scrip
+  * call named-checkconf with absolute path, fixing #1296
+
+ -- Antoine Beaupré <anarcat@debian.org>  Thu, 14 Jun 2012 15:29:10 -0300
+
+alternc-slavedns (1.1) stable; urgency=low
+
+  [anarcat]
+  * port to standard POSIX sh, check the zones as we go, not just the last
+    one, and use named-checkconf
+  * don't cat the grep output, control errors better
+  * don't make the 'zero size' error appear in emails, it's harmless most
+    of the time
+  * be more precise about failures, cleanup properly
+  * add usage to script
+  * don't invalidate a complete master for a single error
+  * allow dashes in hostnames and numerals at the start of labels (RFC1035
+    is too strict)
+  * suggest using ca-certificates
+
+  [fufroma]
+  * Erreur d'implementation corrigée
+  * Check un poil plus avancé du fichier slavedns avant de l'appliqué (#1152)
+
+ -- Antoine Beaupré <anarcat@debian.org>  Thu, 31 May 2012 14:25:51 -0400
+
+alternc-slavedns (1.0) stable; urgency=low
+
+  * add sanity checks for incoming domains and debugging mode
+  * declare this a stable version
+  * add manpage
+  * config now stored in /etc/alternc/slavedns
+
+ -- Benjamin Sonntag <benjamin@alternc.org>  Thu, 19 Jul 2011 09:20:44 +0200
+
+alternc-slavedns (0.9.5) testing; urgency=low
+
+  * Adding the case when alternc-slavedns is installed on a machine having alternc >=0.9.3 installed. (#1040)
+
+ -- Antoine Beaupré <antoine@koumbit.org>  Thu,  4 Oct 2007 15:03:03 -0400
+
+alternc-slavedns (0.9.4) stable; urgency=low
+
+  * the slavedns.conf file is now deprecated, being replaced by the
+    defaults.conf file. the file is still ignored by the script, but as of now, the
+    script relies on defaults.conf being present to set defaults.
+  * documentation was created in a README file
+  * the above allows us to setup program locations and such from a
+    configuration file instead of having to hack the script for each port.
+  * passwordless syncs are now allowed
+  * arbitrary urls are now allowed
+  * the slavedns script can be called with a conf file as an argument, in which
+    case it will source only this file
+
+ -- Antoine Beaupré <antoine@koumbit.org>  Fri, 27 Jan 2006 14:18:32 -0500
+
+alternc-slavedns (0.9.3.1) stable; urgency=low
+
+  * add the -f flag (lunar)
+  * add lines to slavedns.conf only if necessary and don't remove it (lunar)
+  * arch: all
+  * bunch of other fixes
+  * take over maintainership
+
+ -- Antoine Beaupré <antoine@koumbit.org>  Fri, 27 Jan 2006 14:18:32 -0500
+
+alternc-slavedns (0.9.3) testing; urgency=low
+
+  * Increased compatibility with debian sarge policy.
+  * Uses po-debconf (first test for other alternc packages)
+
+ -- Benjamin Sonntag <benjamin@alternc.org>  Tue, 5 Apr 2005 13:50:00 +0200
+
+alternc-slavedns (0.9.2-20041105) unstable; urgency=low
+
+  * Bug in slavedns.conf (HOST => MASTERIP)
+
+ -- Benjamin Sonntag <benjamin@alternc.org>  Tue, 27 Aug 2004 18:12:26 +0200
+
+alternc-slavedns (0.9.2-20040827) unstable; urgency=low
+
+  * Upstream update.
+
+ -- Benjamin Sonntag <benjamin@alternc.org>  Tue, 27 Aug 2004 18:12:26 +0200
+
+alternc-slavedns (0.1-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Benjamin Sonntag <benjamin@alternc.org>  Tue, 2 Jun 2004 19:31:26 +0200
