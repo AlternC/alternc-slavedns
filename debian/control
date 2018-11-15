@@ -9,6 +9,7 @@ Package: alternc-slavedns
 Architecture: all
 Depends: debconf (>= 0.5.00),
  bind | bind9,
+ bind9utils,
  wget | wget-ssl,
  cron,
  ${misc:Depends}

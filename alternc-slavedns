@@ -9,7 +9,8 @@ BINDINCLUDE=/etc/bind/slavedns.conf
 WGETRC=${HOME}/.wgetrc
 WGET=wget
 WGETFLAGS="-q"
-NAMED="/etc/init.d/bind restart" 
+NAMED="/etc/init.d/bind restart"
+NAMED_CHECKCONF="/usr/sbi/nnamed-checkconf"
 DEFAULTS="defaults.conf"
 DEFAULTSFILE="${CONFDIR}/${DEFAULTS}"
 DEBUG=false
@@ -206,5 +207,9 @@ for conf in ${CONFIGS}; do
 done # Main loop on config files
 
 if [ "$RELOAD" ]; then
-    ${NAMED} >/dev/null
+    if $NAMEDCHECKCONF >&2 ; then
+        ${NAMED} >/dev/null
+    else
+        echo "Error in named configuration - bind not reloaded" >&2
+    fi
 fi
