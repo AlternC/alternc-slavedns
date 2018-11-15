@@ -76,3 +76,9 @@ the master server, for example if the server is reached through DNS.
 For this reason, it might be advisable to hardcode those domain names in `/etc/hosts`
 so that if this nameserver looses its zonefiles, it can at least fetch them again
 from the upstream.
+
+Source
+------
+
+Copied from a history-less SVN checkout after the original depot was lost. See
+also https://gitlab.com/anarcat/alternc-slavedns/
