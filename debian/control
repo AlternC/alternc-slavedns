@@ -7,7 +7,11 @@ Standards-Version: 3.9.3
 
 Package: alternc-slavedns
 Architecture: all
-Depends: debconf (>= 0.5.00), bind | bind9, wget | wget-ssl, cron, ${misc:Depends}
+Depends: debconf (>= 0.5.00),
+ bind | bind9,
+ wget | wget-ssl,
+ cron,
+ ${misc:Depends}
 Suggests: ca-certificates
 Description: Synchronize slave dns servers domain lists from masters
  This package automatically configures your server to grab list of domains
