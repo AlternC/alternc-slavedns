@@ -10,7 +10,7 @@ WGETRC=${HOME}/.wgetrc
 WGET=wget
 WGETFLAGS="-q"
 NAMED="/etc/init.d/bind restart"
-NAMED_CHECKCONF="/usr/sbi/nnamed-checkconf"
+NAMED_CHECKCONF="/usr/sbin/named-checkconf"
 DEFAULTS="defaults.conf"
 DEFAULTSFILE="${CONFDIR}/${DEFAULTS}"
 DEBUG=false
@@ -207,7 +207,7 @@ for conf in ${CONFIGS}; do
 done # Main loop on config files
 
 if [ "$RELOAD" ]; then
-    if $NAMEDCHECKCONF >&2 ; then
+    if $NAMED_CHECKCONF >&2 ; then
         ${NAMED} >/dev/null
     else
         echo "Error in named configuration - bind not reloaded" >&2
