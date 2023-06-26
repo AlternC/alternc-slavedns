@@ -10,7 +10,7 @@ WGETRC=${HOME}/.wgetrc
 WGET=wget
 WGETFLAGS="-q"
 NAMED="/usr/sbin/service bind9 restart"
-NAMED_CHECKCONF="/usr/sbin/named-checkconf"
+NAMED_CHECKCONF=$(which named-checkconf)
 DEFAULTS="defaults.conf"
 DEFAULTSFILE="${CONFDIR}/${DEFAULTS}"
 DEBUG=false
@@ -85,6 +85,7 @@ zone "$domain" {
 EOF
     done < ${CACHEDIR}/${CFILE}
     mv ${BINDDIR}/${CFILE}.$$ ${BINDDIR}/${CFILE}
+    chown bind:bind ${BINDDIR}/${CFILE}
     INCLUDE_STR="include \"${BINDDIR}/${CFILE}\";"
 
     grep -q "${INCLUDE_STR}" ${BINDINCLUDE} || echo ${INCLUDE_STR} >>${BINDINCLUDE}
@@ -193,7 +194,7 @@ for conf in ${CONFIGS}; do
                 mv -f ${CACHEDIR}/${conf}.temp ${CACHEDIR}/${conf}
                 # Now parse the slave file and send it to /etc/bind/slavedns
                 CreateBindConf ${conf}
-                if /usr/sbin/named-checkconf ${BINDDIR}/${conf}; then
+                if $NAMED_CHECKCONF ${BINDDIR}/${conf}; then
                     RELOAD="yes"
                 else
                     echo "error: file ${conf} is not correct" >&2
